@@ -9,8 +9,8 @@ import (
 )
 
 func TestErrorf_LogsError(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	oldDefault := slog.Default()
 	slog.SetDefault(logger)
 	defer slog.SetDefault(oldDefault)
@@ -18,10 +18,10 @@ func TestErrorf_LogsError(t *testing.T) {
 	ctx := context.Background()
 	Errorf(ctx, "test error: %s", "something failed")
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	if r.Level != slog.LevelError {
 		t.Errorf("expected level Error, got %v", r.Level)
 	}
@@ -47,23 +47,23 @@ func TestErrorf_LogsError(t *testing.T) {
 }
 
 func TestErrorf_WithLoggerInContext(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	ctx := NewContext(context.Background(), logger)
 
 	Errorf(ctx, "ctx error: %d", 42)
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	if cap.records[0].Level != slog.LevelError {
-		t.Errorf("expected level Error, got %v", cap.records[0].Level)
+	if capture.records[0].Level != slog.LevelError {
+		t.Errorf("expected level Error, got %v", capture.records[0].Level)
 	}
 }
 
 func TestErrorLevel_LogsAtSpecifiedLevel(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	oldDefault := slog.Default()
 	slog.SetDefault(logger)
 	defer slog.SetDefault(oldDefault)
@@ -72,18 +72,18 @@ func TestErrorLevel_LogsAtSpecifiedLevel(t *testing.T) {
 	err := errors.Errorf("wrapped: %w", errors.New("root"))
 	ErrorLevel(ctx, err, slog.LevelWarn)
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	if r.Level != slog.LevelWarn {
 		t.Errorf("expected level Warn, got %v", r.Level)
 	}
 }
 
 func TestErrorLevel_NilError_NoLog(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	oldDefault := slog.Default()
 	slog.SetDefault(logger)
 	defer slog.SetDefault(oldDefault)
@@ -91,23 +91,23 @@ func TestErrorLevel_NilError_NoLog(t *testing.T) {
 	ctx := context.Background()
 	ErrorLevel(ctx, nil, slog.LevelError)
 
-	if len(cap.records) != 0 {
-		t.Errorf("expected 0 records when err is nil, got %d", len(cap.records))
+	if len(capture.records) != 0 {
+		t.Errorf("expected 0 records when err is nil, got %d", len(capture.records))
 	}
 }
 
 func TestErrorLevel_WithLoggerInContext(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	ctx := NewContext(context.Background(), logger)
 
 	err := errors.New("sentinel")
 	ErrorLevel(ctx, err, slog.LevelInfo)
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	if cap.records[0].Level != slog.LevelInfo {
-		t.Errorf("expected level Info, got %v", cap.records[0].Level)
+	if capture.records[0].Level != slog.LevelInfo {
+		t.Errorf("expected level Info, got %v", capture.records[0].Level)
 	}
 }

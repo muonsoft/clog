@@ -95,7 +95,7 @@ func Middleware(next http.Handler, opts *MiddlewareOptions) http.Handler {
 		}
 
 		r = r.WithContext(ctx)
-		var rw http.ResponseWriter = w
+		rw := w
 		if opts.logFinish() {
 			rw = &responseWriter{ResponseWriter: w, statusCode: 200, written: false}
 		}
@@ -193,7 +193,9 @@ func (w *responseWriter) Unwrap() http.ResponseWriter {
 func generateRequestID() string {
 	b := make([]byte, 8)
 	ms := time.Now().UnixMilli() & 0xFFFFFFFFFFFF // 48 bits
-	binary.BigEndian.PutUint64(b, uint64(ms)<<16) // high 6 bytes used
+	// G115: ms is masked to 48 bits so value is in [0, 0xFFFFFFFFFFFF], safe for uint64.
+	msU := uint64(ms) //nolint:gosec // see comment above
+	binary.BigEndian.PutUint64(b, msU<<16)
 	if _, err := rand.Read(b[6:8]); err != nil {
 		// fallback: use nanos mod 65536 for uniqueness
 		b[6] = byte(time.Now().UnixNano() >> 8)

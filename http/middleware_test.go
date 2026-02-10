@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/muonsoft/clog"
-	"log/slog"
 )
 
 func TestMiddleware_InjectsLoggerWithRequestID(t *testing.T) {
@@ -231,7 +231,7 @@ func TestResponseWriter_SSE_FlushInHandler(t *testing.T) {
 // nonFlusherWriter is an http.ResponseWriter that does NOT implement http.Flusher.
 type nonFlusherWriter struct{}
 
-func (w *nonFlusherWriter) Header() http.Header        { return http.Header{} }
+func (w *nonFlusherWriter) Header() http.Header         { return http.Header{} }
 func (w *nonFlusherWriter) Write(b []byte) (int, error) { return len(b), nil }
 func (w *nonFlusherWriter) WriteHeader(int)             {}
 

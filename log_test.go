@@ -7,16 +7,16 @@ import (
 )
 
 func TestInfo_WithLoggerInContext_RecordsLevelAndMessage(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	ctx := NewContext(context.Background(), logger)
 
 	Info(ctx, "test message", "key", "value")
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	if r.Level != slog.LevelInfo {
 		t.Errorf("expected level Info, got %v", r.Level)
 	}
@@ -36,29 +36,29 @@ func TestInfo_WithLoggerInContext_RecordsLevelAndMessage(t *testing.T) {
 }
 
 func TestDebug_WhenDisabled_DoesNotCallHandler(t *testing.T) {
-	cap := &captureHandler{}
-	inner := &levelHandler{level: slog.LevelInfo, h: cap}
+	capture := &captureHandler{}
+	inner := &levelHandler{level: slog.LevelInfo, h: capture}
 	logger := slog.New(inner)
 	ctx := NewContext(context.Background(), logger)
 
 	Debug(ctx, "should not appear")
 
-	if len(cap.records) != 0 {
-		t.Errorf("expected 0 records when Debug disabled, got %d", len(cap.records))
+	if len(capture.records) != 0 {
+		t.Errorf("expected 0 records when Debug disabled, got %d", len(capture.records))
 	}
 }
 
 func TestLogAttrs_WithLoggerInContext_RecordsAttrs(t *testing.T) {
-	cap := &captureHandler{}
-	logger := slog.New(cap)
+	capture := &captureHandler{}
+	logger := slog.New(capture)
 	ctx := NewContext(context.Background(), logger)
 
 	LogAttrs(ctx, slog.LevelWarn, "warn msg", slog.Int("n", 42), slog.String("s", "x"))
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	if r.Level != slog.LevelWarn {
 		t.Errorf("expected level Warn, got %v", r.Level)
 	}

@@ -1,0 +1,104 @@
+version: "2"
+linters:
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - durationcheck
+    - forbidigo
+    - funlen
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - importas
+    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - promlinter
+    - revive
+    - staticcheck
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - whitespace
+  settings:
+    depguard:
+      rules:
+        main:
+          files:
+            - $all
+            - '!$test'
+            - '!**/test/**/*'
+          allow:
+            - $gostd
+            - github.com
+        test:
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com
+    revive:
+      rules:
+        - name: var-naming
+          disabled: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - contextcheck
+          - cyclop
+          - dupl
+          - errcheck
+          - exportloopref
+          - funlen
+          - gochecknoglobals
+          - gocognit
+          - goconst
+          - gocritic
+          - gocyclo
+          - gosec
+          - lll
+          - nestif
+          - staticcheck
+          - testpackage
+        path: _test\.go
+    paths:
+      - var
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

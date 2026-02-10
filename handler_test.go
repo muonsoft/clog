@@ -27,9 +27,9 @@ func (h *captureHandler) WithGroup(name string) slog.Handler {
 }
 
 func TestContextHandler_Handle_AddsAttrsFromContext(t *testing.T) {
-	cap := &captureHandler{}
+	capture := &captureHandler{}
 	keys := []ContextKey{"trace_id", "user_id"}
-	h := NewContextHandler(cap, keys)
+	h := NewContextHandler(capture, keys)
 	logger := slog.New(h)
 
 	ctx := context.Background()
@@ -38,10 +38,10 @@ func TestContextHandler_Handle_AddsAttrsFromContext(t *testing.T) {
 
 	logger.InfoContext(ctx, "test message", "extra", "value")
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	var foundTrace, foundUser, foundExtra bool
 	r.Attrs(func(a slog.Attr) bool {
 		switch a.Key {
@@ -66,18 +66,18 @@ func TestContextHandler_Handle_AddsAttrsFromContext(t *testing.T) {
 }
 
 func TestContextHandler_Handle_IgnoresNilValues(t *testing.T) {
-	cap := &captureHandler{}
+	capture := &captureHandler{}
 	keys := []ContextKey{"missing"}
-	h := NewContextHandler(cap, keys)
+	h := NewContextHandler(capture, keys)
 	logger := slog.New(h)
 
 	ctx := context.Background()
 	logger.InfoContext(ctx, "test")
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	count := 0
 	r.Attrs(func(a slog.Attr) bool {
 		if a.Key == "missing" {
@@ -91,18 +91,18 @@ func TestContextHandler_Handle_IgnoresNilValues(t *testing.T) {
 }
 
 func TestContextHandler_WithAttrs_PreservesContextExtraction(t *testing.T) {
-	cap := &captureHandler{}
-	h := NewContextHandler(cap, []ContextKey{"ctx_key"})
+	capture := &captureHandler{}
+	h := NewContextHandler(capture, []ContextKey{"ctx_key"})
 	wrapped := h.WithAttrs([]slog.Attr{slog.String("fixed", "attr")})
 	logger := slog.New(wrapped)
 
 	ctx := context.WithValue(context.Background(), ContextKey("ctx_key"), "ctx_value")
 	logger.InfoContext(ctx, "msg")
 
-	if len(cap.records) != 1 {
-		t.Fatalf("expected 1 record, got %d", len(cap.records))
+	if len(capture.records) != 1 {
+		t.Fatalf("expected 1 record, got %d", len(capture.records))
 	}
-	r := cap.records[0]
+	r := capture.records[0]
 	var foundCtx bool
 	r.Attrs(func(a slog.Attr) bool {
 		if a.Key == "ctx_key" && a.Value.String() == "ctx_value" {
